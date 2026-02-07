@@ -3,9 +3,8 @@
 import { useState, type ReactNode } from "react";
 import { Header } from "./header";
 import { BottomNav } from "./bottom-nav";
-import { FloatingChatButton } from "./floating-chat-button";
-import { ChatAssistant } from "./chat-assistant";
-
+ 
+ 
 interface CivicLayoutProps {
   children: ReactNode;
 }
@@ -22,16 +21,8 @@ export function CivicLayout({ children }: CivicLayoutProps) {
       />
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
       <BottomNav currentLanguage={language} />
-      <FloatingChatButton
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        isOpen={isChatOpen}
-        currentLanguage={language}
-      />
-      <ChatAssistant
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        currentLanguage={language}
-      />
+       
+       
     </div>
   );
 }

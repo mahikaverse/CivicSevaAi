@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import ChatBot from "@/components/global/ChatBot";
+
 
 const notoSans = Noto_Sans({
   subsets: ["latin", "devanagari"],
@@ -52,6 +54,7 @@ export default function RootLayout({
       <body className={`${notoSans.variable} font-sans antialiased`}>
         {children}
         <Analytics />
+        <ChatBot />
       </body>
     </html>
   );
