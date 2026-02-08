@@ -2,7 +2,8 @@
 
 import React from "react"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import { CivicLayout } from "@/components/civic/civic-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -221,6 +222,65 @@ const statusConfig = {
 };
 
 export default function ComplaintsPage() {
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+const [loading, setLoading] = useState(true);
+
+
+useEffect(() => {
+  const fetchComplaints = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/complaints");
+      const data = await res.json();
+
+      if (!data.success) return;
+
+      const mappedComplaints: Complaint[] = data.complaints.map((c: any) => ({
+        id: c._id,
+        type: c.issueType,
+        typeIcon:
+          c.issueType === "water" ? Droplet :
+          c.issueType === "roads" ? Car :
+          c.issueType === "electricity" ? Zap :
+          c.issueType === "sanitation" ? Trash2 :
+          c.issueType === "streetlights" ? Lightbulb :
+          Trash2,
+        title: c.description.slice(0, 40) + "...",
+        description: c.description,
+        location: c.location,
+        status:
+          c.status === "Resolved"
+            ? "resolved"
+            : c.status === "In Progress"
+            ? "in-progress"
+            : "submitted",
+        progress:
+          c.status === "Resolved"
+            ? 100
+            : c.status === "In Progress"
+            ? 60
+            : 10,
+        date: new Date(c.createdAt).toDateString(),
+        lastUpdate: new Date(c.updatedAt).toDateString(),
+        timeline: [
+          {
+            date: new Date(c.createdAt).toDateString(),
+            status: "Submitted",
+            description: "Complaint registered successfully",
+          },
+        ],
+      }));
+
+      setComplaints(mappedComplaints);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchComplaints();
+}, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(
     null
@@ -229,7 +289,7 @@ export default function ComplaintsPage() {
     "all"
   );
 
-  const filteredComplaints = mockComplaints.filter((complaint) => {
+  const filteredComplaints = complaints.filter((complaint) => {
     const matchesSearch =
       complaint.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       complaint.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -239,11 +299,12 @@ export default function ComplaintsPage() {
   });
 
   const stats = {
-    total: mockComplaints.length,
-    submitted: mockComplaints.filter((c) => c.status === "submitted").length,
-    inProgress: mockComplaints.filter((c) => c.status === "in-progress").length,
-    resolved: mockComplaints.filter((c) => c.status === "resolved").length,
-  };
+  total: complaints.length,
+  submitted: complaints.filter((c) => c.status === "submitted").length,
+  inProgress: complaints.filter((c) => c.status === "in-progress").length,
+  resolved: complaints.filter((c) => c.status === "resolved").length,
+};
+
 
   return (
     <CivicLayout>

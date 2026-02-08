@@ -1,72 +1,58 @@
- const express = require("express");
+const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
 router.post("/", async (req, res) => {
   try {
-    const message = req.body.message;
+    const { message } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Message required" });
     }
 
     const response = await axios.post(
-      "http://127.0.0.1:11434/api/generate",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
       {
-        model: "mistral",
-        prompt: `
- You are CivicSeva AI.
+        contents: [
+          {
+            parts: [
+              {
+                text: `
+You are CivicSeva AI.
 
-VERY STRICT RULES:
-
-LANGUAGE:
-- Always reply in Hinglish (Roman Hindi + English mix)
-- Simple daily language only
-
-REPLY STYLE:
-- Max 2 lines only
+RULES:
+- Reply only in Hinglish
+- Max 2 lines
 - No emojis
-- No greetings like Hey / Hello
-- No repeated sentences
-- No extra talk
-- No storytelling
-- No asking unnecessary questions
+- No greetings
+- Practical civic help only
 
-TONE:
-- Practical civic helper
-- Straight to solution
-- Like government help desk assistant
-
-CIVIC RULE:
-If issue problem → Suggest complaint action
-If scheme → Explain simply
-If doubt → Give short practical answer
-
-GOOD Reply Example:
-"Ye water supply issue lag raha hai. Aap municipal complaint register karo ya local water department se contact karo."
-
-BAD Reply Example:
-"Hey there 😊 I totally understand..."
-
-User Message:
+User message:
 ${message}
-
-Reply (Max 2 lines Hinglish only):
-        `,
-        stream: false
+                `,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        params: {
+          key: process.env.GEMINI_API_KEY,
+        },
       }
     );
 
-    res.json({
-      reply: response.data.response
-    });
+    const reply =
+      response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Abhi response nahi mil pa raha, thoda baad try karo.";
 
+    res.json({ reply });
   } catch (error) {
-    console.log("OLLAMA ERROR:", error.message);
-    res.status(500).json({
-      error: "Ollama failed",
-      details: error.message
-    });
+    console.error(
+      "GEMINI REST ERROR:",
+      error.response?.data || error.message
+    );
+    res.status(500).json({ error: "Gemini failed" });
   }
 });
 

@@ -21,3 +21,21 @@ export const voiceChat = async (req, res) => {
     res.status(500).json({ error: "Voice chat failed" });
   }
 };
+
+// ✅ TEXT CHAT (for chatbot UI)
+export const textChat = async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ reply: "Message is required" });
+    }
+
+    const aiReply = await getAIResponse(message);
+
+    res.json({ reply: aiReply });
+  } catch (error) {
+    console.error("Text chat error:", error);
+    res.status(500).json({ reply: "Chat failed" });
+  }
+};

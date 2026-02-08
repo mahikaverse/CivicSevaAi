@@ -47,7 +47,7 @@ useEffect(() => {
       login: "Login",
     },
     hi: {
-      appName: "नागरिक सेवा AI AI",
+      appName: "सिविक सेवा AI",
       tagline: "नागरिक सहायक",
       help: "मदद",
       voice: "आवाज़",

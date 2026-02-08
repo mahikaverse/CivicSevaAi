@@ -10,9 +10,10 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 const schemeRoutes = require('./routes/schemes');
-const chatRoutes = require('./routes/chat'); // ⭐ NEW
+const chatRoutes = require('./routes/chat.js'); // ⭐ NEW
 const sttRoutes = require("./routes/stt");
 const ttsRoutes = require("./routes/tts");
+const complaintsRoute = require("./routes/complaints");
 const app = express();
 
 app.use(express.json());
@@ -23,7 +24,7 @@ connectDB();
 
 app.use("/api/auth", authRoutes);
 
-app.use('/api/complaints', complaintRoutes);
+app.use("/api/complaints", complaintsRoute);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/chat', chatRoutes); // ⭐ NEW
 app.use("/api/stt", sttRoutes);

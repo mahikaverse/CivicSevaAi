@@ -88,14 +88,48 @@ export default function ReportPage() {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleAutoLocation = () => {
-    setIsLocating(true);
-    // Simulate geolocation
-    setTimeout(() => {
-      setLocation("Sector 15, Noida, Uttar Pradesh");
+const handleAutoLocation = () => {
+  setIsLocating(true);
+
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser");
+    setIsLocating(false);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        // Reverse geocoding (OpenStreetMap – FREE)
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+        );
+
+        const data = await res.json();
+
+        setLocation(
+          data.display_name ||
+            `Lat: ${latitude}, Lng: ${longitude}`
+        );
+      } catch (error) {
+        setLocation(`Lat: ${latitude}, Lng: ${longitude}`);
+      }
+
       setIsLocating(false);
-    }, 1500);
-  };
+    },
+    (error) => {
+      alert("Unable to fetch location. Please allow location access.");
+      setIsLocating(false);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+    }
+  );
+};
+
 
   const handleVoiceInput = () => {
     setIsListening(true);
@@ -107,14 +141,42 @@ export default function ReportPage() {
     }, 2000);
   };
 
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setComplaintId(`CMP-${Date.now().toString().slice(-8)}`);
-      setIsSubmitting(false);
-      setStep(5);
-    }, 2000);
-  };
+ const handleSubmit = async () => {
+  if (!selectedType) return;
+
+  setIsSubmitting(true);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/complaints", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        issueType: selectedType,
+        description,
+        images,   // still fine for now
+        location,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error("Failed to submit complaint");
+    }
+
+    // ✅ REAL complaint ID from DB
+    setComplaintId(data.complaintId);
+    setStep(5);
+  } catch (error) {
+    alert("Something went wrong while submitting complaint");
+    console.error(error);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const canProceed = () => {
     switch (step) {

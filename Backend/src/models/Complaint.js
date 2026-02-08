@@ -2,27 +2,17 @@ const mongoose = require("mongoose");
 
 const complaintSchema = new mongoose.Schema(
   {
-    title: {
+    issueType: {
       type: String,
       required: true,
-      trim: true,
     },
     description: {
       type: String,
       required: true,
     },
-    category: {
-      type: String,
-      required: true,
-      enum: [
-        "Road",
-        "Water",
-        "Electricity",
-        "Garbage",
-        "Drainage",
-        "Street Light",
-        "Other",
-      ],
+    images: {
+      type: [String],
+      default: [],
     },
     location: {
       type: String,
@@ -30,13 +20,7 @@ const complaintSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "in_progress", "resolved"],
-      default: "pending",
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      default: "Pending",
     },
   },
   { timestamps: true }
